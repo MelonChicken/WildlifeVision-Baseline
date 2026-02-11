@@ -1,0 +1,106 @@
+name: Task / Experiment
+description: 전처리, 특징, 모델, 평가, 제출 등 작업 단위 기록
+title: "[Area] 한 줄 요약"
+labels: ["experiment"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - data
+        - preprocess
+        - feature
+        - model
+        - eval
+        - submission
+        - refactor
+        - docs
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: 급하면 P0
+      options:
+        - P0
+        - P1
+        - P2
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: 목표(Why)
+      description: 왜 하는지, 어떤 리스크(누수/재현성 등)를 막는지
+      placeholder: 예) site 누수 방지 목적의 GroupKFold fold 생성
+    validations:
+      required: true
+
+  - type: textarea
+    id: changes
+    attributes:
+      label: 변경 사항(What)
+      description: 코드/데이터/설정에서 바뀐 점
+      placeholder: 예) train_features + train_labels merge → artifacts/train_table.csv 생성
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: verify
+    attributes:
+      label: 검증(How to verify)
+      description: 최소 체크리스트
+      options:
+        - label: 로컬 실행 OK (명령/스크립트 기입)
+        - label: 산출물 생성/갱신 OK (파일 경로 기입)
+        - label: sanity check OK (shape/range/null/unique/누수 등)
+        - label: 재현성 기록 (seed/config/버전)
+    validations:
+      required: false
+
+  - type: textarea
+    id: results
+    attributes:
+      label: 결과(Result)
+      description: 지표/로그/스크린샷 링크
+      placeholder: |
+        - metric: 
+        - notes:
+    validations:
+      required: false
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: 영향 범위(Impact)
+      description: 영향 파일/모듈, 리스크/주의사항
+      placeholder: |
+        - files:
+        - risk:
+    validations:
+      required: false
+
+  - type: textarea
+    id: next
+    attributes:
+      label: 다음 액션(Next)
+      placeholder: |
+        - [ ] 
+        - [ ]
+    validations:
+      required: false
+
+  - type: textarea
+    id: refs
+    attributes:
+      label: 참고(References)
+      description: 관련 이슈/PR, 링크
+      placeholder: |
+        - related:
+        - link:
+    validations:
+      required: false

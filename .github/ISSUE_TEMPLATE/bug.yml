@@ -1,0 +1,109 @@
+name: Bug
+description: 오류/예외/결과 이상 등 문제 보고
+title: "[Bug] 한 줄 요약"
+labels: ["bug", "P0"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - data
+        - preprocess
+        - feature
+        - model
+        - eval
+        - submission
+        - infra
+        - docs
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0
+        - P1
+        - P2
+    validations:
+      required: true
+
+  - type: textarea
+    id: symptom
+    attributes:
+      label: 현상(Symptom)
+      placeholder: 예) main.py 실행 시 train_table.csv를 찾지 못함
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 방법(Steps)
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대 결과(Expected)
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 실제 결과(Actual)
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 환경(Environment)
+      placeholder: |
+        - OS:
+        - Python:
+        - 주요 라이브러리 버전:
+        - 실행 위치(로컬/CI):
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 로그/스크린샷
+      description: 에러 로그는 그대로 붙여넣기
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: hypothesis
+    attributes:
+      label: 원인 추정(가능하면)
+    validations:
+      required: false
+
+  - type: textarea
+    id: fix
+    attributes:
+      label: 해결 방향(가능하면)
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: done
+    attributes:
+      label: 완료 조건(Definition of Done)
+      options:
+        - label: 수정 후 재현 불가 확인
+        - label: 회귀 체크/테스트 추가(선택)
+    validations:
+      required: false
