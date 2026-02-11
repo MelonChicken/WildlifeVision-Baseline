@@ -207,8 +207,10 @@ marimo/_lsp/
 __marimo__/
 
 # competition data
-train_features/
-test_features/
+artifacts/
+data/
+cache/
+
 *.zip
 *.pth
 *.pkl
