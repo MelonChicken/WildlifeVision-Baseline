@@ -3,9 +3,12 @@ import os
 from src.config.paths import *
 
 
-def make_train_table() -> pd.DataFrame:
+def make_train_table(
+        autosave=True,
+) -> pd.DataFrame:
     """
     make single train table
+    :param autosave:
     :return: pd.DataFrame
     """
 
@@ -26,7 +29,8 @@ def make_train_table() -> pd.DataFrame:
     df_merged['filepath'] = 'data/' + df_merged['filepath'].astype(str)
 
     # print(df_merged.head())
-    df_merged.to_csv(os.path.join(ARTIFACTS_DIR, 'processed', 'train_table.csv'))
+    if autosave:
+        df_merged.to_csv(os.path.join(ARTIFACTS_DIR, 'processed', 'train_table.csv'))
 
     if not(len(df_merged) == len(df_train_features) & len(df_merged) == len(df_train_labels)):
         raise Exception("number of lines in training table and training features do not match")
