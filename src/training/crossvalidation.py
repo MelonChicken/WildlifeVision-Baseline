@@ -30,7 +30,7 @@ def add_group_folds(
 
     df_output = df.copy()
     # reset the row index to prevent indexing collision issue
-    df_output.reset_index(drop=True)
+    df_output = df_output.reset_index(drop=True)
     df_output[fold_col] = -1 # initialize the value
 
     # X and y are not mandatory to split, just for indexing data
@@ -52,8 +52,72 @@ def add_group_folds(
         df_output.iloc[val_idx, df_output.columns.get_loc(fold_col)] = fold_num
 
     # check fold column values if they are in 0-(n_splits - 1) since their initial values were -1
-    assert (df_output["fold"] >= 0).all()
+    assert (df_output[fold_col] >= 0).all()
 
     df_output.to_csv(os.path.join(ARTIFACTS_DIR, 'processed', 'train_table_with_folds.csv'), index=False)
 
     return df_output
+
+def check_site_has_single_fold(
+        df: pd.DataFrame,
+        *,
+        site_col: str = "site",
+        fold_col: str = "fold") -> None:
+    """
+    Validate that each site (group) is assigned to exactly one fold.
+
+    This ensures GroupKFold constraints are satisfied: the same site must not
+    appear across multiple folds. Raises ValueError if any site maps to more
+    than one fold.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input table containing site and fold columns.
+    site_col : str, default="site"
+        Column name representing the grouping key (e.g., camera trap site).
+    fold_col : str, default="fold"
+        Column name representing the assigned fold id.
+
+    Raises
+    ------
+    ValueError
+        If at least one site is assigned to multiple folds.
+    """
+
+    n_folds_per_site = df.groupby(site_col)[fold_col].nunique()
+    bad = n_folds_per_site[n_folds_per_site != 1]
+    if len(bad) > 0:
+        raise ValueError(f"Some sites appear in multiple folds: {bad.head(10).to_dict()}")
+
+def check_no_site_overlap_between_train_valid(df: pd.DataFrame, *, site_col: str = "site", fold_col: str = "fold") -> None:
+    """
+    Validate there is no overlap of sites between train and validation splits per fold.
+
+    For each fold f, the validation set is rows where fold_col == f and the training set
+    is rows where fold_col != f. This function checks that the set of site values in
+    validation does not intersect with the set of site values in training. Raises
+    ValueError if any overlap is found.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input table containing site and fold columns.
+    site_col : str, default="site"
+        Column name representing the grouping key (e.g., camera trap site).
+    fold_col : str, default="fold"
+        Column name representing the assigned fold id.
+
+    Raises
+    ------
+    ValueError
+        If any fold has at least one site present in both train and validation.
+    """
+
+    folds = sorted(df[fold_col].unique())
+    for f in folds:
+        train_sites = set(df.loc[df[fold_col] != f, site_col])
+        valid_sites = set(df.loc[df[fold_col] == f, site_col])
+        inter = train_sites & valid_sites
+        if inter:
+            raise ValueError(f"Site overlap detected in fold {f}: {list(inter)[:10]}")
