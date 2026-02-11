@@ -14,15 +14,18 @@ def add_group_folds(
     n_splits: int = 5,
     fold_col: str = "fold",
     shuffle: bool = False,
+    autosave: bool = True,
     random_state: int = 42,
 ) -> pd.DataFrame:
     """
     add group fold column to the train table to ensure the situation that the same site(group) appears in both train and valid data
+
     :param fold_col:
     :param df: pd.DataFrame
     :param group_col: str
     :param n_splits: int : default n_splits is 5 which usually results in the normal performance in training process
     :param shuffle: bool
+    :param autosave:
     :param random_state: int
 
     :return: pd.DataFrame
@@ -54,7 +57,8 @@ def add_group_folds(
     # check fold column values if they are in 0-(n_splits - 1) since their initial values were -1
     assert (df_output[fold_col] >= 0).all()
 
-    df_output.to_csv(os.path.join(ARTIFACTS_DIR, 'processed', 'train_table_with_folds.csv'), index=False)
+    if autosave:
+        df_output.to_csv(os.path.join(ARTIFACTS_DIR, 'processed', 'train_table_with_folds.csv'), index=False)
 
     return df_output
 
