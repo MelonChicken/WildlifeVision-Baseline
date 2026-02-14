@@ -214,3 +214,4 @@ artifacts/cache/
 *.zip
 *.pth
 *.pkl
+/submissions/
