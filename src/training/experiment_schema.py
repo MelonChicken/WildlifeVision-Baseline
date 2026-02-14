@@ -32,6 +32,7 @@ class LogRegParams:
     C: float
     max_iter: int
     use_scaler: bool
+    class_weight: bool
 
 
 @dataclass(frozen=True)

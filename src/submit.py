@@ -65,7 +65,7 @@ def main():
         prefix="test_hog",
     )
 
-    # 4) 모델 학습(전체 train)
+    # 4) 모델 학습 (전체 train)
     cfg = LogRegConfig(
         C=0.1,
         max_iter=2000,

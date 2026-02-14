@@ -8,4 +8,4 @@ class LogRegConfig:
 
     solver: str = "lbfgs"
     random_state: int = 42
-    class_weight="balanced"
+    class_weight: str | None = None

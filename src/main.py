@@ -1,4 +1,5 @@
 from data.make_table import *
+from src.config.model_config import LogRegConfig
 from src.data.inspect_images import *
 from src.features.hog import *
 from src.models.logreg import build_logreg_pipeline
@@ -40,43 +41,59 @@ X, y, fold = load_or_build_train_hog_cache(
 assert fold is not None, "fold가 None입니다. add_group_folds 결과를 확인하세요."
 site = df_train_table_w_folds["site"].to_numpy() if "site" in df_train_table_w_folds.columns else None
 
-
-# train model and validate
-
 grid = [
-    {"C": 0.1, "use_scaler": True},
-    {"C": 1.0, "use_scaler": True},
-    {"C": 10.0, "use_scaler": True},
-    {"C": 0.1, "use_scaler": False},
-    {"C": 1.0, "use_scaler": False},
-    {"C": 10.0, "use_scaler": False},
+    {"C": 0.02, "use_scaler": False, "class_weight": None},
+    {"C": 0.05, "use_scaler": False, "class_weight": None},
+    {"C": 0.1,  "use_scaler": False, "class_weight": None},
+    {"C": 0.2,  "use_scaler": False, "class_weight": None},
+    {"C": 0.5,  "use_scaler": False, "class_weight": None},
+
+    {"C": 0.02, "use_scaler": False, "class_weight": "balanced"},
+    {"C": 0.05, "use_scaler": False, "class_weight": "balanced"},
+    {"C": 0.1,  "use_scaler": False, "class_weight": "balanced"},
+    {"C": 0.2,  "use_scaler": False, "class_weight": "balanced"},
+    {"C": 0.5,  "use_scaler": False, "class_weight": "balanced"},
 ]
+
 class_counts = {str(k): int(v) for k, v in zip(*np.unique(y, return_counts=True))}
 data_sig = DataSignature(
     n_samples=int(len(y)),
     n_sites=int(df_train_table_w_folds["site"].nunique()),
     class_counts=class_counts,
 )
-for cfg in grid:
-    C = cfg["C"]
-    use_scaler = cfg["use_scaler"]
 
+for cfg_dict in grid:
+    # 1) Config 객체 생성
+    cfg = LogRegConfig(
+        C=float(cfg_dict["C"]),
+        max_iter=2000,
+        use_scaler=bool(cfg_dict["use_scaler"]),
+        solver="lbfgs",
+        random_state=42,
+        class_weight=cfg_dict["class_weight"],
+    )
+
+    # 2) CV 평가
     mean_log_loss, standard_log_loss, scores = evaluate_by_fold(
         X=X,
         y=y,
         fold=fold,
-        build_model_fn=lambda C=C, use_scaler=use_scaler: build_logreg_pipeline(
-            C=C, max_iter=2000, use_scaler=use_scaler
-        )
+        build_model_fn=lambda cfg=cfg: build_logreg_pipeline(cfg)
     )
 
+    # 3) 로그 레코드 (class_weight 포함)
     record = build_record(
-        tag="logreg_hog_grid_v1",
+        tag="logreg_hog_grid_v2",  # v2로 올리는 걸 권장(스키마/그리드 변경)
         feature_name="hog",
         model_name="logreg",
         cv_type="GroupKFold(site)",
         n_splits=5,
-        logreg_params=LogRegParams(C=float(C), max_iter=2000, use_scaler=bool(use_scaler)),
+        logreg_params=LogRegParams(
+            C=float(cfg.C),
+            max_iter=int(cfg.max_iter),
+            use_scaler=bool(cfg.use_scaler),
+            class_weight=cfg.class_weight,   # 아래 LogRegParams에 필드 추가 필요
+        ),
         hog_params=HogParams(
             pixels_per_cell=(8, 8),
             cells_per_block=(2, 2),
@@ -96,4 +113,4 @@ for cfg in grid:
     )
 
     log_experiment(LOG_PATH, record.to_dict())
-    print(f"[log] appended -> {LOG_PATH} | C={C}, scaler={use_scaler}")
+    print(f"[log] appended -> {LOG_PATH} | C={cfg.C}, scaler={cfg.use_scaler}, class_weight={cfg.class_weight}")
