@@ -8,7 +8,7 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 > 공모전: https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/
 > 
 > 
-> 현재 단계: **베이스라인 구축 및 1차 제출 목표**
+> 현재 단계: **HOG feature 기반 Logistic Regression 모델의 성능 향상을 위한 미세 조정**
 > 
 
 ---
