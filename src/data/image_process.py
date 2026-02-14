@@ -6,19 +6,23 @@ import random
 
 def image_preprocess(
     img_path: str | Path,
+    base_path: str | Path=None,
     out_size=(128, 128),
     normalize=True,
     pad_value=0,
 ) -> np.ndarray:
     """
     Load image as grayscale and resize with aspect ratio preserved (letterbox).
+    :param base_path: base path to project
     :param img_path: path to image
     :param out_size: output image size (H, W)
     :param normalize: whether to normalize image
     :param pad_value: padding value
     :return: resized image (H, W) float32
     """
-    with Image.open(img_path) as img:
+    image_path = base_path / img_path if base_path else img_path
+
+    with Image.open(image_path) as img:
         # convert into grayscale
         img = img.convert("L")
 
