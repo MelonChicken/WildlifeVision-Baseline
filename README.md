@@ -18,6 +18,14 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 - 문제: 카메라트랩 이미지 분류는 **촬영 환경 변화**가 크고, 무작위 분할로 평가하면 실제 성능을 과대평가하기 쉽다.
 - 해결: 이미지에서 **“Histogram of Oriented Gradients, HOG” 특징을 추출**하고 **scikit-learn 확률 분류기**로 학습하되, 검증은 **GroupKFold**로 고정하여 “site 일반화”를 반영한다.
 
+> Performance Progress
+> |**current best score (Log Loss): Feb 14, 2026**|
+> |---|
+> | `~=1.8639499` |
+
+![img.svg](docs/experiments/plot/experiment_progress.svg)
+
+
 >Repository Structure
 >
 * `data/` : 원본 zip 압축 해제 파일/폴더(읽기 전용, repo에 업로드하지 않음)
