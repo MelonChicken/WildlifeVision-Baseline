@@ -42,17 +42,17 @@ assert fold is not None, "fold가 None입니다. add_group_folds 결과를 확�
 site = df_train_table_w_folds["site"].to_numpy() if "site" in df_train_table_w_folds.columns else None
 
 grid = [
+    {"C": 0.005, "use_scaler": False, "class_weight": None},
+    {"C": 0.01, "use_scaler": False, "class_weight": None},
     {"C": 0.02, "use_scaler": False, "class_weight": None},
     {"C": 0.05, "use_scaler": False, "class_weight": None},
     {"C": 0.1,  "use_scaler": False, "class_weight": None},
-    {"C": 0.2,  "use_scaler": False, "class_weight": None},
-    {"C": 0.5,  "use_scaler": False, "class_weight": None},
 
+    {"C": 0.005, "use_scaler": False, "class_weight": "balanced"},
+    {"C": 0.01, "use_scaler": False, "class_weight": "balanced"},
     {"C": 0.02, "use_scaler": False, "class_weight": "balanced"},
     {"C": 0.05, "use_scaler": False, "class_weight": "balanced"},
     {"C": 0.1,  "use_scaler": False, "class_weight": "balanced"},
-    {"C": 0.2,  "use_scaler": False, "class_weight": "balanced"},
-    {"C": 0.5,  "use_scaler": False, "class_weight": "balanced"},
 ]
 
 class_counts = {str(k): int(v) for k, v in zip(*np.unique(y, return_counts=True))}
