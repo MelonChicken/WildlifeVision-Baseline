@@ -209,7 +209,7 @@ __marimo__/
 # competition data
 artifacts/
 data/
-cache/
+artifacts/cache/
 
 *.zip
 *.pth
