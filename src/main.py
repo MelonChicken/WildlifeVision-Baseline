@@ -5,6 +5,8 @@ from src.models.logreg import build_logreg_pipeline
 from src.training.evaluate import *
 from src.training.crossvalidation import *
 from src.data.image_process import *
+from src.training.experiment_logger import log_experiment
+from src.training.experiment_schema import DataSignature, build_record, LogRegParams, HogParams, CVChecks
 
 # 1. make single train table
 df_train_table = make_train_table(autosave=True)
@@ -20,6 +22,8 @@ df_train_table_w_folds = add_group_folds(df_train_table, shuffle=True, random_st
 # 3. check if the fold information added without any errors
 check_site_has_single_fold(df_train_table_w_folds, site_col="site", fold_col="fold")
 check_no_site_overlap_between_train_valid(df_train_table_w_folds, site_col="site", fold_col="fold")
+fold_site_counts = {int(k): int(v) for k, v in df_train_table_w_folds.groupby("fold")["site"].nunique().to_dict().items()}
+
 
 # 4. visualize image distribution
 # df, summary = collect_image_sizes(df_train_table_w_folds['filepath'])
@@ -39,9 +43,57 @@ site = df_train_table_w_folds["site"].to_numpy() if "site" in df_train_table_w_f
 
 # train model and validate
 
-mean_log_loss, standard_log_loss, scores = evaluate_by_fold(
-    X=X,
-    y=y,
-    fold=fold,
-    build_model_fn=lambda: build_logreg_pipeline(C=1.0, max_iter=2000, use_scaler=True)
+grid = [
+    {"C": 0.1, "use_scaler": True},
+    {"C": 1.0, "use_scaler": True},
+    {"C": 10.0, "use_scaler": True},
+    {"C": 0.1, "use_scaler": False},
+    {"C": 1.0, "use_scaler": False},
+    {"C": 10.0, "use_scaler": False},
+]
+class_counts = {str(k): int(v) for k, v in zip(*np.unique(y, return_counts=True))}
+data_sig = DataSignature(
+    n_samples=int(len(y)),
+    n_sites=int(df_train_table_w_folds["site"].nunique()),
+    class_counts=class_counts,
 )
+for cfg in grid:
+    C = cfg["C"]
+    use_scaler = cfg["use_scaler"]
+
+    mean_log_loss, standard_log_loss, scores = evaluate_by_fold(
+        X=X,
+        y=y,
+        fold=fold,
+        build_model_fn=lambda C=C, use_scaler=use_scaler: build_logreg_pipeline(
+            C=C, max_iter=2000, use_scaler=use_scaler
+        )
+    )
+
+    record = build_record(
+        tag="logreg_hog_grid_v1",
+        feature_name="hog",
+        model_name="logreg",
+        cv_type="GroupKFold(site)",
+        n_splits=5,
+        logreg_params=LogRegParams(C=float(C), max_iter=2000, use_scaler=bool(use_scaler)),
+        hog_params=HogParams(
+            pixels_per_cell=(8, 8),
+            cells_per_block=(2, 2),
+            orientations=9,
+            block_norm="L2-Hys",
+        ),
+        mean_log_loss=mean_log_loss,
+        std_log_loss=standard_log_loss,
+        fold_log_loss=scores,
+        data_sig=data_sig,
+        cv_checks=CVChecks(
+            site_single_fold=True,
+            no_site_overlap=True,
+            random_state=42,
+        ),
+        fold_site_counts=fold_site_counts,
+    )
+
+    log_experiment(LOG_PATH, record.to_dict())
+    print(f"[log] appended -> {LOG_PATH} | C={C}, scaler={use_scaler}")

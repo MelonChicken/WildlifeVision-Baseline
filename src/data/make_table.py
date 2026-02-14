@@ -36,3 +36,23 @@ def make_train_table(
         raise Exception("number of lines in training table and training features do not match")
 
     return df_merged
+
+def make_test_table(autosave: bool = True) -> pd.DataFrame:
+    """
+    test table (metadata only)
+    columns: id, filepath, site
+    index: id
+    """
+    df_meta = pd.read_csv(DATA_DIR / "test_features.csv")  # 지금 파일명이 이거라면 그대로 사용
+    required = {"id", "filepath", "site"}
+    if not required.issubset(df_meta.columns):
+        raise ValueError(f"test_features.csv must include {required}, got {set(df_meta.columns)}")
+
+    df_meta['filepath'] = 'data/' + df_meta['filepath'].astype(str)
+    df_meta = df_meta.set_index("id")
+    df_meta.index.name = "id"
+
+    if autosave:
+        df_meta.to_csv(ARTIFACTS_DIR / "processed" / "test_table.csv")
+
+    return df_meta
