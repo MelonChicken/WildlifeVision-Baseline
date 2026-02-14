@@ -13,7 +13,7 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 
 ---
 
-> Executive Summary
+> ## Executive Summary
 > 
 - 문제: 카메라트랩 이미지 분류는 **촬영 환경 변화**가 크고, 무작위 분할로 평가하면 실제 성능을 과대평가하기 쉽다.
 - 해결: 이미지에서 **“Histogram of Oriented Gradients, HOG” 특징을 추출**하고 **scikit-learn 확률 분류기**로 학습하되, 검증은 **GroupKFold**로 고정하여 “site 일반화”를 반영한다.
@@ -25,8 +25,14 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 
 ![img.svg](docs/experiments/plot/experiment_progress.svg)
 
+> ## Experiments
 
->Repository Structure
+| EXP ID | Summary | CV (mean log loss) | Leaderboard (log loss : rank) | Report | Assets |
+|---|---|---:|---:|---|---|
+| EXP_LOGREG_HOG_002 | LogReg + HOG baseline & grid (GroupKFold by site) | **1.86395** | **1.9354** : `358/557` | [Report](docs/experiments/EXP_LOGREG_HOG_002.md) | [Imgs](docs/assets/imgs/EXP_LOGREG_HOG_002/) |
+
+
+> ## Repository Structure
 >
 * `data/` : 원본 zip 압축 해제 파일/폴더(읽기 전용, repo에 업로드하지 않음)
 * `notebooks/` : 탐색/시각화/실험 기록용 노트북
