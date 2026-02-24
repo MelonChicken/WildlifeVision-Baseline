@@ -30,7 +30,7 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 | EXP ID | Summary | CV (mean log loss) | Leaderboard (log loss : rank) | Report | Assets |
 |---|---|---:|---:|---|---|
 | EXP_LOGREG_HOG_002 | LogReg + HOG baseline & grid (GroupKFold by site) | **1.86395** | **1.9354** : `358/557` | [Report](docs/experiments/EXP_LOGREG_HOG_002.md) | [Imgs](docs/assets/imgs/EXP_LOGREG_HOG_002/) |
-| EXP_LOGREG_HOG_003 | Focused tuning around best log (`n_splits=6`, `C around 0.003`, `class_weight=balanced`) | **1.85570** | - | [Report](docs/experiments/EXP_LOGREG_HOG_003/EXP_LOGREG_HOG_003.md) | - |
+| EXP_LOGREG_HOG_003 | Focused tuning around best log (`n_splits=6`, `C around 0.003`, `class_weight=balanced`) | **1.85570** | **1.9318** : `359/579` | [Report](docs/experiments/EXP_LOGREG_HOG_003/EXP_LOGREG_HOG_003.md) | - |
 
 
 > ## Repository Structure
@@ -48,3 +48,4 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 
 
 >The Pan African Programme: The Cultured Chimpanzee, Wild Chimpanzee Foundation, DrivenData. (2022). Conser-vision Practice Area: Image Classification. Retrieved 02-11-2026 from https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/.
+
