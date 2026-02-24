@@ -1,3 +1,4 @@
+### 날짜 `2026-02-14`
 ### 실험 ID
 
 * `EXP_LOGREG_HOG_002`  (tag: `logreg_hog_grid_v2`, best run_id: `7d251ed19c`)
