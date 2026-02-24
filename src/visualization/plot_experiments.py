@@ -65,7 +65,6 @@ def main():
         raise RuntimeError("No valid rows with timestamp + mean_log_loss found.")
 
     rows.sort(key=lambda r: r["ts"])
-    t = [r["ts"] for r in rows]
     run_idx = np.arange(1, len(rows) + 1, dtype=int)
     y = np.array([r["mean"] for r in rows], dtype=float)
 
@@ -97,8 +96,8 @@ def main():
 
     fig, ax = plt.subplots(figsize=(12.0, 5.6))
 
-    ax.scatter(t, y, s=18, alpha=0.45, label="Run")
-    ax.plot(t, best, linestyle="--", linewidth=1.6, label="Best so far")
+    ax.scatter(run_idx, y, s=18, alpha=0.45, label="Run")
+    ax.plot(run_idx, best, linestyle="--", linewidth=1.6, label="Best so far")
 
     # Mark every new best point to show performance jumps.
     bt_series = [run_idx[i] for i in best_points]
@@ -125,8 +124,7 @@ def main():
         ax.text(
             0.01,
             0.98,
-            f"Runs: {len(y)} | Latest: {latest_date} | First: {first:.4f} | "
-            f"Best: {np.min(y):.4f} | Gain: {gain:.4f}",
+            f"Runs: {len(y)} | First: {first:.4f} | Best: {np.min(y):.4f} | Gain: {gain:.4f}",
             transform=ax.transAxes,
             va="top",
             ha="left",
@@ -137,13 +135,24 @@ def main():
         ax.text(
             0.01,
             0.98,
-            f"Runs: {len(y)} | Latest: {latest_date} | Best: {np.min(y):.4f}",
+            f"Runs: {len(y)} | Best: {np.min(y):.4f}",
             transform=ax.transAxes,
             va="top",
             ha="left",
             fontsize=9,
             bbox=dict(boxstyle="round,pad=0.25", alpha=0.12, lw=0),
         )
+
+    ax.text(
+        0.99,
+        0.02,
+        f"Latest run date: {latest_date}",
+        transform=ax.transAxes,
+        va="bottom",
+        ha="right",
+        fontsize=9,
+        bbox=dict(boxstyle="round,pad=0.22", alpha=0.10, lw=0),
+    )
 
     ax.set_title("Experiment Progress")
     ax.set_xlabel("Run #")
