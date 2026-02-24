@@ -19,9 +19,9 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 - 해결: 이미지에서 **“Histogram of Oriented Gradients, HOG” 특징을 추출**하고 **scikit-learn 확률 분류기**로 학습하되, 검증은 **GroupKFold**로 고정하여 “site 일반화”를 반영한다.
 
 > Performance Progress
-> |**current best score (Log Loss): Feb 14, 2026**|
+> |**current best score (Log Loss): Feb 24, 2026**|
 > |---|
-> | `~=1.8639499` |
+> | `~=1.855702` |
 
 ![img.svg](docs/experiments/plot/experiment_progress.svg)
 
