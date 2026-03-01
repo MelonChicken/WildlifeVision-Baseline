@@ -49,3 +49,35 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 
 >The Pan African Programme: The Cultured Chimpanzee, Wild Chimpanzee Foundation, DrivenData. (2022). Conser-vision Practice Area: Image Classification. Retrieved 02-11-2026 from https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/.
 
+
+## Runbook: HOG 튜닝 -> `run_id` 기반 제출
+
+1. HOG 튜닝 실험 실행:
+
+```bash
+python -m src.experiments.run_hog_tune --base_dir . --n_splits 5 --seed 42
+```
+
+- 로그는 `artifacts/experiments/experiments.jsonl`에 한 줄씩 추가됩니다.
+- 각 실험은 `tag`로 구분됩니다(예: `hog_tune_v1__ori_12`).
+- 로그 스키마는 아래 필드를 유지합니다:
+  `run_id, timestamp, env, tag, feature_name, model_name, cv, params, metrics, data_signature, cv_checks, fold_site_counts`
+- 아래는 실제 실험 로그 1줄입니다.
+  ```
+    {"run_id": "91d73dbc9d", "timestamp": "2026-03-01T05:33:39.689359+00:00", "env": {"python": "3.12.10", "sklearn": "1.8.0"}, "tag": "hog_tune_v1__cpb_3x3", "feature_name": "hog", "model_name": "logreg", "cv": {"type": "GroupKFold(site)", "n_splits": 5}, "params": {"logreg": {"C": 0.003, "max_iter": 6000, "use_scaler": false, "class_weight": "balanced", "solver": "lbfgs", "random_state": 42}, "hog": {"pixels_per_cell": [8, 8], "cells_per_block": [3, 3], "orientations": 9, "block_norm": "L2-Hys", "tiled": false}}, "metrics": {"mean_log_loss": 1.8572156815071872, "std_log_loss": 0.09373077381970896, "fold_log_loss": [1.967952720563294, 1.9480761662756538, 1.8303029869951282, 1.708933614853802, 1.8308129188480584]}, "data_signature": {"n_samples": 16488, "n_sites": 148, "class_counts": {"antelope_duiker": 2474, "bird": 1641, "blank": 2213, "civet_genet": 2423, "hog": 978, "leopard": 2254, "monkey_prosimian": 2492, "rodent": 2013}}, "cv_checks": {"site_single_fold": true, "no_site_overlap": true, "random_state": 42}, "fold_site_counts": {"0": 30, "1": 30, "2": 30, "3": 29, "4": 29}}```
+
+2. `experiments.jsonl`에서 원하는 실험의 `run_id`를 선택합니다.
+
+3. 선택한 `run_id`의 로그 파라미터로 모델을 재현한 뒤, test 추론 및 제출 파일 생성:
+
+```bash
+python -m src.submit --run_id 58ba15d713 --base_dir .
+```
+
+- `src.submit` 동작 순서:
+  1. run_id로 실험 로그 조회
+  2. 로그 파라미터로 HOG + LogReg 재현
+  3. test 추론 
+  4. submission CSV 저장
+- 선택한 실험 로그에 `error`가 기록되어 있으면 제출 생성을 차단합니다.
+
