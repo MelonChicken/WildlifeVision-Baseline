@@ -41,6 +41,158 @@ def extract_hog(
     return feat
 
 
+def get_hog_feature_dim(
+    image_shape_hw: tuple[int, int],
+    pixels_per_cell: tuple[int, int] = (8, 8),
+    cells_per_block: tuple[int, int] = (2, 2),
+    orientations: int = 9,
+    block_norm: str = "L2-Hys",
+    tiled: bool = False,
+    tiles: tuple[int, int] = (2, 2),
+) -> int:
+    """
+    Return expected HOG feature dimension for a given image shape.
+    For tiled=(2,2), return baseline_dim * 4.
+    """
+    if len(image_shape_hw) != 2:
+        raise ValueError(f"image_shape_hw must be (H, W). Got: {image_shape_hw}")
+
+    h, w = int(image_shape_hw[0]), int(image_shape_hw[1])
+    if h <= 0 or w <= 0:
+        raise ValueError(f"image_shape_hw values must be positive. Got: {(h, w)}")
+
+    x = np.zeros((h, w), dtype=np.float32)
+    baseline_dim = int(
+        extract_hog(
+            x,
+            pixels_per_cell=pixels_per_cell,
+            cells_per_block=cells_per_block,
+            orientations=orientations,
+            block_norm=block_norm,
+        ).shape[0]
+    )
+    if not tiled:
+        return baseline_dim
+
+    if tiles != (2, 2):
+        raise NotImplementedError(f"Only tiles=(2,2) is supported. Got: {tiles}")
+
+    return baseline_dim * 4
+
+
+def extract_hog_tiled(
+    x: np.ndarray,
+    tiles: tuple[int, int] = (2, 2),
+    pixels_per_cell: tuple[int, int] = (8, 8),
+    cells_per_block: tuple[int, int] = (2, 2),
+    orientations: int = 9,
+    block_norm: str = "L2-Hys",
+) -> np.ndarray:
+    """
+    Extract 2x2 tiled HOG and concatenate tile features.
+    Input x must be float32 (recommended), shape (H, W), range [0,1].
+    """
+    if x.ndim != 2:
+        raise ValueError(f"x must be 2D (H, W). Got shape={x.shape}")
+    if tiles != (2, 2):
+        raise NotImplementedError(f"Only tiles=(2,2) is supported. Got: {tiles}")
+
+    h, w = x.shape
+    h_mid = h // 2
+    w_mid = w // 2
+
+    tile1 = x[0:h_mid, 0:w_mid]
+    tile2 = x[0:h_mid, w_mid:w]
+    tile3 = x[h_mid:h, 0:w_mid]
+    tile4 = x[h_mid:h, w_mid:w]
+
+    # Keep fixed-length per tile by placing each tile into a full-size canvas.
+    c1 = np.zeros_like(x, dtype=np.float32)
+    c1[0:h_mid, 0:w_mid] = tile1
+    c2 = np.zeros_like(x, dtype=np.float32)
+    c2[0:h_mid, w_mid:w] = tile2
+    c3 = np.zeros_like(x, dtype=np.float32)
+    c3[h_mid:h, 0:w_mid] = tile3
+    c4 = np.zeros_like(x, dtype=np.float32)
+    c4[h_mid:h, w_mid:w] = tile4
+
+    feats = [
+        extract_hog(
+            c1,
+            pixels_per_cell=pixels_per_cell,
+            cells_per_block=cells_per_block,
+            orientations=orientations,
+            block_norm=block_norm,
+        ),
+        extract_hog(
+            c2,
+            pixels_per_cell=pixels_per_cell,
+            cells_per_block=cells_per_block,
+            orientations=orientations,
+            block_norm=block_norm,
+        ),
+        extract_hog(
+            c3,
+            pixels_per_cell=pixels_per_cell,
+            cells_per_block=cells_per_block,
+            orientations=orientations,
+            block_norm=block_norm,
+        ),
+        extract_hog(
+            c4,
+            pixels_per_cell=pixels_per_cell,
+            cells_per_block=cells_per_block,
+            orientations=orientations,
+            block_norm=block_norm,
+        ),
+    ]
+    feat = np.concatenate(feats).astype(np.float32, copy=False)
+
+    expected_dim = get_hog_feature_dim(
+        image_shape_hw=x.shape,
+        pixels_per_cell=pixels_per_cell,
+        cells_per_block=cells_per_block,
+        orientations=orientations,
+        block_norm=block_norm,
+        tiled=True,
+        tiles=tiles,
+    )
+    assert feat.shape[0] == expected_dim, (
+        f"Tiled HOG dim mismatch: got={feat.shape[0]}, expected={expected_dim}"
+    )
+    return feat
+
+
+def assert_tiled_feature_dim_quadrupled(
+    image_shape_hw: tuple[int, int],
+    pixels_per_cell: tuple[int, int] = (8, 8),
+    cells_per_block: tuple[int, int] = (2, 2),
+    orientations: int = 9,
+    block_norm: str = "L2-Hys",
+    tiles: tuple[int, int] = (2, 2),
+) -> None:
+    baseline_dim = get_hog_feature_dim(
+        image_shape_hw=image_shape_hw,
+        pixels_per_cell=pixels_per_cell,
+        cells_per_block=cells_per_block,
+        orientations=orientations,
+        block_norm=block_norm,
+        tiled=False,
+    )
+    tiled_dim = get_hog_feature_dim(
+        image_shape_hw=image_shape_hw,
+        pixels_per_cell=pixels_per_cell,
+        cells_per_block=cells_per_block,
+        orientations=orientations,
+        block_norm=block_norm,
+        tiled=True,
+        tiles=tiles,
+    )
+    assert tiled_dim == baseline_dim * 4, (
+        f"Expected tiled dim == 4x baseline dim, got tiled={tiled_dim}, baseline={baseline_dim}"
+    )
+
+
 def sanity_check_hog(
         df: pd.DataFrame,
         project_root: Path,
