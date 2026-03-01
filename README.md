@@ -21,7 +21,7 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 > Performance Progress
 > |**current best score (Log Loss): Feb 24, 2026**|
 > |---|
-> | `~=1.855702` |
+> | `~=1.8029` |
 
 ![img.svg](docs/experiments/plot/experiment_progress.svg)
 
@@ -29,9 +29,9 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 
 | EXP ID | Summary | CV (mean log loss) | Leaderboard (log loss : rank) | Report | Assets |
 |---|---|---:|---:|---|---|
-| EXP_LOGREG_HOG_002 | LogReg + HOG baseline & grid (GroupKFold by site) | **1.86395** | **1.9354** : `358/557` | [Report](docs/experiments/EXP_LOGREG_HOG_002.md) | [Imgs](docs/assets/imgs/EXP_LOGREG_HOG_002/) |
-| EXP_LOGREG_HOG_003 | Focused tuning around best log (`n_splits=6`, `C around 0.003`, `class_weight=balanced`) | **1.85570** | **1.9318** : `359/579` | [Report](docs/experiments/EXP_LOGREG_HOG_003/EXP_LOGREG_HOG_003.md) | - |
-
+| EXP_LOGREG_HOG_002 | LogReg + HOG baseline & grid (GroupKFold by site) | **1.8639** | **1.9354** : `358/557` | [Report](docs/experiments/EXP_LOGREG_HOG_002.md) | [Imgs](docs/assets/imgs/EXP_LOGREG_HOG_002/) |
+| EXP_LOGREG_HOG_003 | Focused tuning around best log (`n_splits=6`, `C around 0.003`, `class_weight=balanced`) | **1.8557** | **1.9318** : `359/579` | [Report](docs/experiments/EXP_LOGREG_HOG_003/EXP_LOGREG_HOG_003.md) | - |
+| EXP_LOGREG_HOG_004 | | **1.8029** | **1.9154** : `357/581` | [Report](docs/experiments/EXP_LOGREG_HOG_004/EXP_LOGREG_HOG_004.md) | - |
 
 > ## Repository Structure
 >
@@ -80,4 +80,5 @@ python -m src.submit --run_id 58ba15d713 --base_dir .
   3. test 추론 
   4. submission CSV 저장
 - 선택한 실험 로그에 `error`가 기록되어 있으면 제출 생성을 차단합니다.
+
 
