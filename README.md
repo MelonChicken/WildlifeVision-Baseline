@@ -8,7 +8,7 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 > 공모전: https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/
 > 
 > 
-> 현재 단계: **HOG feature 기반 Logistic Regression 모델의 성능 향상을 위한 미세 조정**
+> 현재 단계: **HOG feature 기반 Logistic Regression 모델의 성능 한계점 포착 (1.8029) 및 다른 모델 모색**
 > 
 
 ---
@@ -19,7 +19,7 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 - 해결: 이미지에서 **“Histogram of Oriented Gradients, HOG” 특징을 추출**하고 **scikit-learn 확률 분류기**로 학습하되, 검증은 **GroupKFold**로 고정하여 “site 일반화”를 반영한다.
 
 > Performance Progress
-> |**current best score (Log Loss): Feb 24, 2026**|
+> |**current best score (Log Loss): Mar 1, 2026**|
 > |---|
 > | `~=1.8029` |
 
@@ -31,7 +31,7 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 |---|---|---:|---:|---|---|
 | EXP_LOGREG_HOG_002 | LogReg + HOG baseline & grid (GroupKFold by site) | **1.8639** | **1.9354** : `358/557` | [Report](docs/experiments/EXP_LOGREG_HOG_002.md) | [Imgs](docs/assets/imgs/EXP_LOGREG_HOG_002/) |
 | EXP_LOGREG_HOG_003 | Focused tuning around best log (`n_splits=6`, `C around 0.003`, `class_weight=balanced`) | **1.8557** | **1.9318** : `359/579` | [Report](docs/experiments/EXP_LOGREG_HOG_003/EXP_LOGREG_HOG_003.md) | - |
-| EXP_LOGREG_HOG_004 | | **1.8029** | **1.9154** : `357/581` | [Report](docs/experiments/EXP_LOGREG_HOG_004/EXP_LOGREG_HOG_004.md) | - |
+| EXP_LOGREG_HOG_004 | Changing and Testing HOG parameters (tiling, orientation, etc.) | **1.8029** | **1.9154** : `357/581` | [Report](docs/experiments/EXP_LOGREG_HOG_004/EXP_LOGREG_HOG_004.md) | - |
 
 > ## Repository Structure
 >
@@ -46,11 +46,7 @@ The baseline with scikit-learn to practice how to make a model for the object cl
   * `reports/` :  실험 결과 요약/그래프 저장
   * `submissions/` :  제출 CSV 파일 보관(버전 관리)
 
-
->The Pan African Programme: The Cultured Chimpanzee, Wild Chimpanzee Foundation, DrivenData. (2022). Conser-vision Practice Area: Image Classification. Retrieved 02-11-2026 from https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/.
-
-
-## Runbook: HOG 튜닝 -> `run_id` 기반 제출
+> ## Runbook: HOG 튜닝 -> `run_id` 기반 제출
 
 1. HOG 튜닝 실험 실행:
 
@@ -80,5 +76,10 @@ python -m src.submit --run_id 58ba15d713 --base_dir .
   3. test 추론 
   4. submission CSV 저장
 - 선택한 실험 로그에 `error`가 기록되어 있으면 제출 생성을 차단합니다.
+
+
+>The Pan African Programme: The Cultured Chimpanzee, Wild Chimpanzee Foundation, DrivenData. (2022). Conser-vision Practice Area: Image Classification. Retrieved 02-11-2026 from https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/.
+
+
 
 
