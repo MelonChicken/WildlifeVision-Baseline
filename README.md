@@ -8,7 +8,7 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 > 공모전: https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/
 > 
 > 
-> 현재 단계: **HOG feature 기반 Logistic Regression 모델의 성능 향상을 위한 미세 조정**
+> 현재 단계: **HOG feature 기반 Logistic Regression 모델의 성능 한계점 포착 (1.8029) 및 다른 모델 모색**
 > 
 
 ---
@@ -80,6 +80,7 @@ python -m src.submit --run_id 58ba15d713 --base_dir .
   3. test 추론 
   4. submission CSV 저장
 - 선택한 실험 로그에 `error`가 기록되어 있으면 제출 생성을 차단합니다.
+
 
 
 
