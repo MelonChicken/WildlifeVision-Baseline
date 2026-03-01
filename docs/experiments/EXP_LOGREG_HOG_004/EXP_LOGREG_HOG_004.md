@@ -1,7 +1,3 @@
-아래 로그 기준으로, **보고서의 “수치(실험 ID/태그/run_id/HOG orientations/결과 수치)”만 교체**해서 정리했습니다. 
-
----
-
 related commit : 253cc314c8fd67ebe0116bff5c1ae4f2e60e1461
 
 ### 날짜 `2026-03-01`
