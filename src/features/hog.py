@@ -1,8 +1,7 @@
+from skimage.feature import hog
 from pathlib import Path
-
 import numpy as np
 import pandas as pd
-from skimage.feature import hog
 
 from src.config.global_variables import CLASS_COLS
 from src.data.image_process import image_preprocess
@@ -297,10 +296,6 @@ def load_or_build_train_hog_cache(
     print(f"[cache] saved: {X_path}, {y_path}, {fold_path}")
 
     return X, y, fold
-
-from pathlib import Path
-import numpy as np
-import pandas as pd
 
 def load_or_build_test_hog_cache(
     df: pd.DataFrame,
