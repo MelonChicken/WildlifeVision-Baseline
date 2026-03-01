@@ -1,8 +1,14 @@
+아래 로그 기준으로, **보고서의 “수치(실험 ID/태그/run_id/HOG orientations/결과 수치)”만 교체**해서 정리했습니다. 
+
+---
+
 related commit : 253cc314c8fd67ebe0116bff5c1ae4f2e60e1461
+
 ### 날짜 `2026-03-01`
+
 ### 실험 ID
 
-* `EXP_LOGREG_HOG_004`  (tag: `hog_tune_v1__ori_12`, best run_id: `58ba15d713`)
+* `EXP_LOGREG_HOG_004`  (tag: `logreg_hog_orient_sweep_v1__ori_16`, best run_id: `fa55fc2045`)
 
 ### 설정
 
@@ -12,7 +18,7 @@ related commit : 253cc314c8fd67ebe0116bff5c1ae4f2e60e1461
 
   * `pixels_per_cell=(8, 8)`
   * `cells_per_block=(2, 2)`
-  * `orientations=12`
+  * `orientations=16`
   * `block_norm="L2-Hys"`
   * `tiled=false`
 * Model: LogisticRegression
@@ -31,10 +37,10 @@ related commit : 253cc314c8fd67ebe0116bff5c1ae4f2e60e1461
 
 * Fold log loss:
 
-  * ` [1.9218773613732805, 1.9035517042217733, 1.7812001179522925, 1.6220636556963934, 1.7858337130252149]`
+  * `[1.9145492432453206, 1.9018648988054554, 1.7772830120266716, 1.619068442949871, 1.7971917670918038]`
 * Mean log loss:
 
-  * `1.8029053104537909` (std: `0.10747120953462243`)
+  * `1.8019914728238244` (std: `0.1065254269814604`)
 
 ### 관찰/해석
 
@@ -42,10 +48,12 @@ related commit : 253cc314c8fd67ebe0116bff5c1ae4f2e60e1461
 
   * `mean log loss`가 눈에 띄게 `(0.1)`만큼 향상되었다.
   * 이전의 최고 성능 세팅과 비교해볼 때 orientation 횟수를 높인게 긍정적인 방향으로 작용한 듯 보인다.
+
     * 방향(orientation): 변화가 어느 방향인지 (보통 HOG는 방향을 0~180도로 사용)
   * 이 밖에서 tiling을 진행하거나 iteration 횟수를 증가하거나 다양한 방식으로 진행해보았지만 눈에 띄는 성능 향상은 없었다.
 
 ### 다음 액션
 
 * 다음 실험에서 바꿀 1가지:
+
   * 성능을 유의미하게 바꿀 수 있는 모델 모색
