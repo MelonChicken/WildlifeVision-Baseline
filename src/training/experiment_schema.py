@@ -32,7 +32,7 @@ class LogRegParams:
     C: float
     max_iter: int
     use_scaler: bool
-    class_weight: bool
+    class_weight: str | None
 
 
 @dataclass(frozen=True)
@@ -45,8 +45,9 @@ class HogParams:
 
 @dataclass(frozen=True)
 class Params:
-    logreg: LogRegParams
     hog: HogParams
+    logreg: LogRegParams | None = None
+    model_params: dict[str, object] | None = None
 
 
 @dataclass(frozen=True)
@@ -118,8 +119,9 @@ def build_record(
     model_name: str,
     cv_type: str,
     n_splits: int,
-    logreg_params: LogRegParams,
+    logreg_params: LogRegParams | None = None,
     hog_params: HogParams,
+    model_params: dict[str, object] | None = None,
     mean_log_loss: float,
     std_log_loss: float,
     fold_log_loss: list[float],
@@ -136,7 +138,7 @@ def build_record(
         feature_name=feature_name,
         model_name=model_name,
         cv=CVInfo(type=cv_type, n_splits=n_splits),
-        params=Params(logreg=logreg_params, hog=hog_params),
+        params=Params(logreg=logreg_params, hog=hog_params, model_params=model_params),
         metrics=Metrics(
             mean_log_loss=float(mean_log_loss),
             std_log_loss=float(std_log_loss),

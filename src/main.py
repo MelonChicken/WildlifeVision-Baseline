@@ -1,51 +1,46 @@
-﻿from data.make_table import *
-from src.config.model_config import LogRegConfig
-from src.data.inspect_images import *
-from src.features.hog import *
-from src.models.logreg import build_logreg_pipeline
-from src.training.evaluate import *
-from src.training.crossvalidation import *
-from src.data.image_process import *
+﻿import numpy as np
+
+from src.config.global_variables import CLASS_COLS
+from src.config.paths import LOG_PATH, PROJECT_ROOT
+from src.data.make_table import make_train_table
+from src.features.hog_matrix import build_hog_features
+from src.models.model_families import CFG_A, MODEL_FAMILIES, build_model_pipeline, get_model_params
+from src.training.crossvalidation import (
+    add_group_folds,
+    check_no_site_overlap_between_train_valid,
+    check_site_has_single_fold,
+)
+from src.training.evaluate import evaluate_by_fold
 from src.training.experiment_logger import log_experiment
-from src.training.experiment_schema import DataSignature, build_record, LogRegParams, HogParams, CVChecks
+from src.training.experiment_schema import CVChecks, DataSignature, HogParams, LogRegParams, build_record
 
-# 1. make single train table
-df_train_table = make_train_table(autosave=True)
-site_counts = df_train_table["site"].value_counts()
+# 1) Build train table
+_df_train_table = make_train_table(autosave=True)
 
-# print(site_counts.describe())
-# print("top 10 sites:\n", site_counts.head(10))
-# print(df_train_table['site'].nunique())
+# 2) Add GroupKFold(site)
+df_train_table_w_folds = add_group_folds(
+    _df_train_table,
+    n_splits=5,
+    shuffle=True,
+    random_state=42,
+    autosave=True,
+)
 
-# 2. add 5 folds to the train table
-df_train_table_w_folds = add_group_folds(df_train_table, n_splits=6, shuffle=True, random_state=42, autosave=True)
-
-# 3. check if the fold information added without any errors
+# 3) Validate fold integrity
 check_site_has_single_fold(df_train_table_w_folds, site_col="site", fold_col="fold")
 check_no_site_overlap_between_train_valid(df_train_table_w_folds, site_col="site", fold_col="fold")
-fold_site_counts = {int(k): int(v) for k, v in df_train_table_w_folds.groupby("fold")["site"].nunique().to_dict().items()}
+fold_site_counts = {
+    int(k): int(v)
+    for k, v in df_train_table_w_folds.groupby("fold")["site"].nunique().to_dict().items()
+}
 
+# 4) Build labels and fold vectors
+row_sum = df_train_table_w_folds[CLASS_COLS].sum(axis=1)
+assert (row_sum == 1).all(), "Each sample must have exactly one active class."
+y_idx = df_train_table_w_folds[CLASS_COLS].to_numpy().argmax(axis=1)
+y = np.array([CLASS_COLS[i] for i in y_idx], dtype=object)
+fold = df_train_table_w_folds["fold"].to_numpy()
 
-# 4. visualize image distribution
-# df, summary = collect_image_sizes(df_train_table_w_folds['filepath'])
-# plot_image_size_distributions(df_sizes=df, output_dir=ARTIFACTS_DIR / 'eda')
-
-# 5. preprocess image & extract hog feature
-# 6. build a fixed-length feature matrix (X) for scikit-learn image classification.
-X, y, fold = load_or_build_train_hog_cache(
-    df=df_train_table_w_folds,
-    project_dir=PROJECT_ROOT,
-    artifacts_dir=ARTIFACTS_DIR,
-    prefix="train_hog"
-)
-assert fold is not None, "fold is None. Check add_group_folds output."
-site = df_train_table_w_folds["site"].to_numpy() if "site" in df_train_table_w_folds.columns else None
-
-grid = [
-    {"C": 0.0028, "use_scaler": False, "class_weight": "balanced"},
-    {"C": 0.0030, "use_scaler": False, "class_weight": "balanced"},
-    {"C": 0.0032, "use_scaler": False, "class_weight": "balanced"},
-]
 class_counts = {str(k): int(v) for k, v in zip(*np.unique(y, return_counts=True))}
 data_sig = DataSignature(
     n_samples=int(len(y)),
@@ -53,43 +48,56 @@ data_sig = DataSignature(
     class_counts=class_counts,
 )
 
-for cfg_dict in grid:
-    cfg = LogRegConfig(
-        C=float(cfg_dict["C"]),
-        max_iter=6000,
-        use_scaler=bool(cfg_dict["use_scaler"]),
-        solver="lbfgs",
-        random_state=42,
-        class_weight=cfg_dict["class_weight"],
-    )
+# 5) Fixed HOG params (orientation best=16)
+orientation = 16
+hog_params = HogParams(
+    pixels_per_cell=(8, 8),
+    cells_per_block=(2, 2),
+    orientations=orientation,
+    block_norm="L2-Hys",
+)
 
+X = build_hog_features(
+    df_train_table_w_folds,
+    project_dir=PROJECT_ROOT,
+    pixels_per_cell=hog_params.pixels_per_cell,
+    cells_per_block=hog_params.cells_per_block,
+    orientations=hog_params.orientations,
+    block_norm=hog_params.block_norm,
+)
 
+# 6) Sweep model families
+for model_family in MODEL_FAMILIES:
     mean_log_loss, standard_log_loss, scores = evaluate_by_fold(
         X=X,
         y=y,
         fold=fold,
-        build_model_fn=lambda cfg=cfg: build_logreg_pipeline(cfg)
+        build_model_fn=lambda mf=model_family: build_model_pipeline(mf),
     )
 
+    model_params = get_model_params(model_family)
+    logreg_params = (
+        LogRegParams(
+            C=float(CFG_A["C"]),
+            max_iter=int(CFG_A["max_iter"]),
+            use_scaler=bool(CFG_A["use_scaler"]),
+            class_weight=(
+                None if CFG_A.get("class_weight") is None else str(CFG_A.get("class_weight"))
+            ),
+        )
+        if model_family == "family_a"
+        else None
+    )
 
     record = build_record(
-        tag="logreg_hog_grid_v4_focus_bal_ns6",
+        tag=f"model_family_sweep_v1__{model_family}__ori_{orientation}",
         feature_name="hog",
-        model_name="logreg",
+        model_name=model_family,
         cv_type="GroupKFold(site)",
-        n_splits=6,
-        logreg_params=LogRegParams(
-            C=float(cfg.C),
-            max_iter=int(cfg.max_iter),
-            use_scaler=bool(cfg.use_scaler),
-            class_weight=cfg.class_weight,
-        ),
-        hog_params=HogParams(
-            pixels_per_cell=(8, 8),
-            cells_per_block=(2, 2),
-            orientations=9,
-            block_norm="L2-Hys",
-        ),
+        n_splits=5,
+        logreg_params=logreg_params,
+        hog_params=hog_params,
+        model_params=model_params,
         mean_log_loss=mean_log_loss,
         std_log_loss=standard_log_loss,
         fold_log_loss=scores,
@@ -103,6 +111,7 @@ for cfg_dict in grid:
     )
 
     log_experiment(LOG_PATH, record.to_dict())
-    print(f"[log] appended -> {LOG_PATH} | C={cfg.C}, scaler={cfg.use_scaler}, class_weight={cfg.class_weight}")
-
-
+    print(
+        f"[log] appended -> {LOG_PATH} | model={model_family}, ori={orientation}, "
+        f"model_params={model_params}"
+    )

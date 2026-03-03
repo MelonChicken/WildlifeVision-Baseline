@@ -8,12 +8,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.config.model_config import LogRegConfig
 from src.config.paths import DATA_DIR, SUBMISSIONS_DIR, PROJECT_ROOT, LOG_PATH
 from src.data.image_process import image_preprocess
 from src.data.make_table import make_train_table, make_test_table
 from src.features.hog import extract_hog, extract_hog_tiled
-from src.models.logreg import build_logreg_pipeline
+from src.models.model_families import MODEL_FAMILIES, build_model_pipeline_from_params
 from src.config.global_variables import CLASS_COLS
 
 SUBMISSION_FORMAT_PATH = DATA_DIR / "submission_format.csv"
@@ -98,22 +97,38 @@ def _to_hog_params(exp: dict) -> tuple[dict, bool]:
     return converted, tiled
 
 
-def _to_logreg_cfg(exp: dict) -> LogRegConfig:
-    params = exp.get("params", {})
-    logreg = params.get("logreg", {})
+def _normalize_model_family(model_name: str | None) -> str:
+    if model_name == "logreg":
+        return "family_a"
+    if model_name in MODEL_FAMILIES:
+        return str(model_name)
+    raise ValueError(f"Unsupported model_name in log: {model_name}")
 
-    required = ["C", "max_iter", "use_scaler", "class_weight"]
-    missing = [k for k in required if k not in logreg]
-    if missing:
-        raise ValueError(f"Missing params.logreg keys in experiment log: {missing}")
 
-    return LogRegConfig(
-        C=float(logreg["C"]),
-        max_iter=int(logreg["max_iter"]),
-        use_scaler=bool(logreg["use_scaler"]),
-        solver=str(logreg.get("solver", "lbfgs")),
-        random_state=int(logreg.get("random_state", 42)),
-        class_weight=logreg["class_weight"],
+def _to_model_params(exp: dict, model_family: str) -> dict[str, object]:
+    params = exp.get("params", {}) or {}
+    model_params = params.get("model_params")
+    if isinstance(model_params, dict):
+        return model_params
+
+    if model_family == "family_a":
+        logreg = params.get("logreg", {}) or {}
+        required = ["C", "max_iter", "use_scaler", "class_weight"]
+        missing = [k for k in required if k not in logreg]
+        if missing:
+            raise ValueError(f"Missing params.logreg keys in experiment log: {missing}")
+        return {
+            "C": float(logreg["C"]),
+            "max_iter": int(logreg["max_iter"]),
+            "use_scaler": bool(logreg["use_scaler"]),
+            "solver": str(logreg.get("solver", "lbfgs")),
+            "random_state": int(logreg.get("random_state", 42)),
+            "class_weight": logreg["class_weight"],
+        }
+
+    raise ValueError(
+        f"Missing params.model_params for model_family={model_family}. "
+        "This run_id was logged before multi-family schema."
     )
 
 
@@ -173,21 +188,19 @@ def main() -> None:
     if exp.get("error"):
         raise ValueError(f"Selected run_id has error in log and cannot be reproduced: {exp['error']}")
 
-    if exp.get("feature_name") != "hog" or exp.get("model_name") != "logreg":
+    if exp.get("feature_name") != "hog":
         raise ValueError(
-            f"Unsupported experiment type. feature_name={exp.get('feature_name')}, model_name={exp.get('model_name')}"
+            f"Unsupported experiment type. feature_name={exp.get('feature_name')}"
         )
 
     hog_params, tiled = _to_hog_params(exp)
-    cfg = _to_logreg_cfg(exp)
+    model_family = _normalize_model_family(exp.get("model_name"))
+    model_params = _to_model_params(exp, model_family)
 
     print(f"[info] selected run_id={run_id}, tag={exp.get('tag')}")
+    print(f"[info] model_family={model_family}")
     print(f"[info] hog_params={hog_params}, tiled={tiled}")
-    print(
-        "[info] logreg_cfg="
-        f"C={cfg.C}, max_iter={cfg.max_iter}, use_scaler={cfg.use_scaler}, "
-        f"solver={cfg.solver}, random_state={cfg.random_state}, class_weight={cfg.class_weight}"
-    )
+    print(f"[info] model_params={model_params}")
 
     df_format = pd.read_csv(SUBMISSION_FORMAT_PATH, index_col=0)
     class_cols = list(df_format.columns)
@@ -213,7 +226,7 @@ def main() -> None:
         tiled=tiled,
     )
 
-    pipe = build_logreg_pipeline(cfg)
+    pipe = build_model_pipeline_from_params(model_family, model_params)
     pipe.fit(X_train, y_train)
 
     proba = pipe.predict_proba(X_test)
