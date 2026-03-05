@@ -17,7 +17,7 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 - **Best run_id (submission 기준)**: `58ba15d713`
 - **Last updated**: **2026-03-01**
 
-> 현재 단계: **HOG feature 기반 Logistic Regression 모델의 성능 한계점 포착(1.8029) 및 다른 모델 방향성 탐색**
+> 현재 단계: benchmark의 모델 개선을 통해 CNN 맛보기
 
 ---
 
@@ -72,9 +72,9 @@ python -m src.submit --run_id 58ba15d713 --base_dir .
 
 ## Performance Progress
 
-| current best score (Log Loss, Competition Submission 기준): **Mar 1, 2026** |
-| ------------------------------------------------------------------------- |
-| `~=1.9154`                                                                |
+| current best score (Log Loss, Competition Submission 기준): **Mar 5, 2026** |
+|---------------------------------------------------------------------------|
+| `~=1.9122	`                                                               |
 
 ![img.svg](docs/experiments/plot/experiment_progress.svg)
 
@@ -82,11 +82,12 @@ python -m src.submit --run_id 58ba15d713 --base_dir .
 
 ## Experiments
 
-| EXP ID             | Summary                                                                                  | CV (mean log loss) | Leaderboard (log loss : rank) | Report                                                              | Assets                                       |
-| ------------------ | ---------------------------------------------------------------------------------------- | -----------------: | ----------------------------: | ------------------------------------------------------------------- | -------------------------------------------- |
-| EXP_LOGREG_HOG_002 | LogReg + HOG baseline & grid (GroupKFold by site)                                        |         **1.8639** |        **1.9354** : `358/557` | [Report](docs/experiments/EXP_LOGREG_HOG_002.md)                    | [Imgs](docs/assets/imgs/EXP_LOGREG_HOG_002/) |
-| EXP_LOGREG_HOG_003 | Focused tuning around best log (`n_splits=6`, `C around 0.003`, `class_weight=balanced`) |         **1.8557** |        **1.9318** : `359/579` | [Report](docs/experiments/EXP_LOGREG_HOG_003/EXP_LOGREG_HOG_003.md) | -                                            |
-| EXP_LOGREG_HOG_004 | Changing and Testing HOG parameters (tiling, orientation, etc.)                          |         **1.8029** |        **1.9154** : `357/581` | [Report](docs/experiments/EXP_LOGREG_HOG_004/EXP_LOGREG_HOG_004.md) | -                                            |
+| EXP ID                 | Summary                                                                                  | CV (mean log loss) | Leaderboard (log loss : rank) | Report                                                                        | Assets                                       |
+|------------------------|------------------------------------------------------------------------------------------|-------------------:|------------------------------:|-------------------------------------------------------------------------------|----------------------------------------------|
+| EXP_LOGREG_HOG_002     | LogReg + HOG baseline & grid (GroupKFold by site)                                        |         **1.8639** |        **1.9354** : `358/557` | [Report](docs/experiments/EXP_LOGREG_HOG_002.md)                              | [Imgs](docs/assets/imgs/EXP_LOGREG_HOG_002/) |
+| EXP_LOGREG_HOG_003     | Focused tuning around best log (`n_splits=6`, `C around 0.003`, `class_weight=balanced`) |         **1.8557** |        **1.9318** : `359/579` | [Report](docs/experiments/EXP_LOGREG_HOG_003/EXP_LOGREG_HOG_003.md)           | -                                            |
+| EXP_LOGREG_HOG_004     | Changing and Testing HOG parameters (tiling, orientation, etc.)                          |         **1.8029** |        **1.9154** : `357/581` | [Report](docs/experiments/EXP_LOGREG_HOG_004/EXP_LOGREG_HOG_004.md)           | -                                            |
+| EXP_MODELEARCH_HOG_001 | Testing models (`Margin + Probability Calibration`, `Nonlinear: HistGradientBoosting`)   |         **1.8197** |        **1.9122** : `355/582` | [Report](docs/experiments/EXP_MODELSEARCH_HOG_001/EXP_MODELSEARCH_HOG_001.md) | -                                           |
 
 ---
 
