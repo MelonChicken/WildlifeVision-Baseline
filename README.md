@@ -12,10 +12,10 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 
 ## Project Status
 
-- **Local CV best (mean log loss)**: **1.8029** (GroupKFold by **site**, `n_splits=6`)
-- **Leaderboard best (log loss : rank)**: **1.9154** : `357/581`
-- **Best run_id (submission 기준)**: `58ba15d713`
-- **Last updated**: **2026-03-01**
+- **Local CV best (mean log loss)**: **1.8197** (GroupKFold by **site**, `n_splits=5`)
+- **Leaderboard best (log loss : rank)**:  **1.9122** : `355/582`
+- **Best run_id (submission 기준)**: `163fee3712`
+- **Last updated**: **2026-03-05**
 
 > 현재 단계: benchmark의 모델 개선을 통해 CNN 맛보기
 
@@ -138,4 +138,5 @@ python -m src.submit --run_id 58ba15d713 --base_dir .
 The Pan African Programme: The Cultured Chimpanzee, Wild Chimpanzee Foundation, DrivenData. (2022).
 Conser-vision Practice Area: Image Classification. Retrieved 02-11-2026 from
 [https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/](https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/)
+
 
