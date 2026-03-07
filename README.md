@@ -10,14 +10,15 @@ The baseline with scikit-learn to practice how to make a model for the object cl
 
 ---
 
-## Project Status
+## Project Status 
+>## Terminated
 
 - **Local CV best (mean log loss)**: **1.8197** (GroupKFold by **site**, `n_splits=5`)
 - **Leaderboard best (log loss : rank)**:  **1.9122** : `355/582`
 - **Best run_id (submission 기준)**: `163fee3712`
-- **Last updated**: **2026-03-05**
+- **Last updated**: **2026-03-07**
 
-> 현재 단계: benchmark의 모델 개선을 통해 CNN 맛보기
+> 현재 단계: CNN model 실습 완료 후 프로젝트 마무리
 
 ---
 
@@ -82,12 +83,13 @@ python -m src.submit --run_id 58ba15d713 --base_dir .
 
 ## Experiments
 
-| EXP ID                 | Summary                                                                                  | CV (mean log loss) | Leaderboard (log loss : rank) | Report                                                                        | Assets                                       |
-|------------------------|------------------------------------------------------------------------------------------|-------------------:|------------------------------:|-------------------------------------------------------------------------------|----------------------------------------------|
-| EXP_LOGREG_HOG_002     | LogReg + HOG baseline & grid (GroupKFold by site)                                        |         **1.8639** |        **1.9354** : `358/557` | [Report](docs/experiments/EXP_LOGREG_HOG_002.md)                              | [Imgs](docs/assets/imgs/EXP_LOGREG_HOG_002/) |
-| EXP_LOGREG_HOG_003     | Focused tuning around best log (`n_splits=6`, `C around 0.003`, `class_weight=balanced`) |         **1.8557** |        **1.9318** : `359/579` | [Report](docs/experiments/EXP_LOGREG_HOG_003/EXP_LOGREG_HOG_003.md)           | -                                            |
-| EXP_LOGREG_HOG_004     | Changing and Testing HOG parameters (tiling, orientation, etc.)                          |         **1.8029** |        **1.9154** : `357/581` | [Report](docs/experiments/EXP_LOGREG_HOG_004/EXP_LOGREG_HOG_004.md)           | -                                            |
+| EXP ID                 | Summary                                                                                  | CV (mean log loss) | Leaderboard (log loss : rank) | Report                                                                      | Assets                                       |
+|------------------------|------------------------------------------------------------------------------------------|-------------------:|------------------------------:|-----------------------------------------------------------------------------|----------------------------------------------|
+| EXP_LOGREG_HOG_002     | LogReg + HOG baseline & grid (GroupKFold by site)                                        |         **1.8639** |        **1.9354** : `358/557` | [Report](docs/experiments/EXP_LOGREG_HOG_002.md)                            | [Imgs](docs/assets/imgs/EXP_LOGREG_HOG_002/) |
+| EXP_LOGREG_HOG_003     | Focused tuning around best log (`n_splits=6`, `C around 0.003`, `class_weight=balanced`) |         **1.8557** |        **1.9318** : `359/579` | [Report](docs/experiments/EXP_LOGREG_HOG_003/EXP_LOGREG_HOG_003.md)         | -                                            |
+| EXP_LOGREG_HOG_004     | Changing and Testing HOG parameters (tiling, orientation, etc.)                          |         **1.8029** |        **1.9154** : `357/581` | [Report](docs/experiments/EXP_LOGREG_HOG_004/EXP_LOGREG_HOG_004.md)         | -                                            |
 | EXP_MODELEARCH_HOG_001 | Testing models (`Margin + Probability Calibration`, `Nonlinear: HistGradientBoosting`)   |         **1.8197** |        **1.9122** : `355/582` | [Report](docs/experiments/EXP_MODELSEARCH_HOG_001/EXP_MODELSEARCH_HOG_001.md) | -                                           |
+| EXP_CNN_001            | Practice CNN model                                                                       |                  - |              **2.1253** : `-` | [Report](docs/experiments/EXP_CNN_001/EXP_CNN_001.md)                       | -                                           |
 
 ---
 
