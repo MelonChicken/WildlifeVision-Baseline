@@ -1,4 +1,4 @@
-# WildlifeVision-Baseline
+# WildlifeVision-Baseline (2026-02-11 - 2026-03-07)
 
 The baseline with scikit-learn to practice how to make a model for the object classification for wildlife species.
 
@@ -140,5 +140,6 @@ python -m src.submit --run_id 58ba15d713 --base_dir .
 The Pan African Programme: The Cultured Chimpanzee, Wild Chimpanzee Foundation, DrivenData. (2022).
 Conser-vision Practice Area: Image Classification. Retrieved 02-11-2026 from
 [https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/](https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/)
+
 
 
